@@ -17,11 +17,12 @@ primera vez se cargan los seis productos de demostración del frontend.
 Requiere Docker Desktop iniciado:
 
 ```powershell
+Copy-Item .env.example .env
 docker compose up --build
 ```
 
-La API queda disponible en `http://localhost:8080`. La carpeta `data/` se
-monta dentro del contenedor para conservar la base H2 entre reinicios.
+La API queda disponible en `http://localhost:8080`. Docker levanta MySQL en un
+contenedor separado y conserva sus datos en el volumen `db_data`.
 
 Para detener los contenedores:
 

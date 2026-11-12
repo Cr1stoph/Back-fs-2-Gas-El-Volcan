@@ -1,4 +1,28 @@
 services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-gasvolcan}
+      MYSQL_USER: ${DB_USER:-gasvolcan}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-gasvolcan}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root1234}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "127.0.0.1",
+          "-uroot",
+          "-p${DB_ROOT_PASSWORD:-root1234}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   backend:
     build:
       context: .
@@ -6,8 +30,16 @@ services:
     container_name: gas-volcan-backend
     ports:
       - "8080:8080"
-    volumes:
-      - ./data:/app/data
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-gasvolcan}
+      DB_USER: ${DB_USER:-gasvolcan}
+      DB_PASSWORD: ${DB_PASSWORD:-gasvolcan}
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  db_data:
