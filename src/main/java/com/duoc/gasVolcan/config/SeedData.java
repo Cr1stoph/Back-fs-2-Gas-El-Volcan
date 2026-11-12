@@ -3,36 +3,52 @@ package com.duoc.gasVolcan.config;
 import java.math.BigDecimal;
 
 import com.duoc.gasVolcan.model.Producto;
+import com.duoc.gasVolcan.model.Usuario;
 import com.duoc.gasVolcan.repository.ProductoRepository;
+import com.duoc.gasVolcan.repository.UsuarioRepository;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class SeedData {
 
 	@Bean
-	CommandLineRunner seedProductos(ProductoRepository repository) {
+	CommandLineRunner seedDatabase(ProductoRepository productoRepository, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
-			if (repository.count() > 0) {
+			if (usuarioRepository.count() == 0) {
+				Usuario admin = new Usuario();
+				admin.setUsername("admin");
+				admin.setEmail("admin@gasvolcan.cl");
+				admin.setPassword(passwordEncoder.encode("admin123"));
+				admin.setRole("ROLE_ADMIN");
+				usuarioRepository.save(admin);
+
+				Usuario cliente = new Usuario();
+				cliente.setUsername("cliente");
+				cliente.setEmail("cliente@gasvolcan.cl");
+				cliente.setPassword(passwordEncoder.encode("cliente123"));
+				cliente.setRole("ROLE_CLIENTE");
+				usuarioRepository.save(cliente);
+			}
+
+			if (productoRepository.count() > 0) {
 				return;
 			}
-			repository.save(new Producto("Cilindro 5 kg", BigDecimal.valueOf(10000), null, "cilindro.svg", 50,
+			productoRepository.save(new Producto("Cilindro 5 kg", BigDecimal.valueOf(10000), null, "cilindro.svg", 50,
 					"Cilindros"));
-			repository.save(new Producto("Cilindro 11 kg", BigDecimal.valueOf(15500), BigDecimal.valueOf(13990),
+			productoRepository.save(new Producto("Cilindro 11 kg", BigDecimal.valueOf(15500), BigDecimal.valueOf(13990),
 					"cilindro.svg", 120, "Cilindros"));
-			repository.save(new Producto("Cilindro 15 kg", BigDecimal.valueOf(21000), null, "cilindro.svg", 80,
+			productoRepository.save(new Producto("Cilindro 15 kg", BigDecimal.valueOf(21000), null, "cilindro.svg", 80,
 					"Cilindros"));
-			repository.save(new Producto("Cilindro 45 kg", BigDecimal.valueOf(65000), null, "cilindro.svg", 12,
+			productoRepository.save(new Producto("Cilindro 45 kg", BigDecimal.valueOf(65000), null, "cilindro.svg", 12,
 					"Cilindros"));
-			repository.save(new Producto("Regulador de gas", BigDecimal.valueOf(10990), BigDecimal.valueOf(8990),
+			productoRepository.save(new Producto("Regulador de gas", BigDecimal.valueOf(10990), BigDecimal.valueOf(8990),
 					"regulador.svg", 35, "Accesorios"));
-			repository.save(new Producto("Flexible para gas", BigDecimal.valueOf(5990), null, "flexible.svg", 40,
+			productoRepository.save(new Producto("Flexible para gas", BigDecimal.valueOf(5990), null, "flexible.svg", 40,
 					"Accesorios"));
 		};
 	}
 }
-
-
-
