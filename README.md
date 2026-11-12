@@ -12,6 +12,23 @@ Requiere JDK 25 (LTS) para compilar y ejecutar.
 El proyecto usa una base H2 persistente en `./data/gas-volcan`. Al iniciar por
 primera vez se cargan los seis productos de demostración del frontend.
 
+## Ejecutar con Docker
+
+Requiere Docker Desktop iniciado:
+
+```powershell
+docker compose up --build
+```
+
+La API queda disponible en `http://localhost:8080`. La carpeta `data/` se
+monta dentro del contenedor para conservar la base H2 entre reinicios.
+
+Para detener los contenedores:
+
+```powershell
+docker compose down
+```
+
 ## API
 
 La API queda disponible en `http://localhost:8080`.

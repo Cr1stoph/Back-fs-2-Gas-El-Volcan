@@ -1,0 +1,9 @@
+.git
+.github
+.idea
+.vscode
+target
+data/*.trace.db
+data/*.lock.db
+*.iml
+README.md
