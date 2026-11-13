@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthService {
+
+	private static final String DEFAULT_ROLE = "ROLE_CLIENTE";
 
 	private final UsuarioRepository usuarioRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -43,16 +46,21 @@ public class AuthService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre de usuario ya está registrado");
 		}
 
-		String role = request.role() != null && !request.role().isBlank() ? request.role() : "ROLE_CLIENTE";
-		if (!role.startsWith("ROLE_")) {
-			role = "ROLE_" + role.toUpperCase();
+		// El auto-registro siempre crea clientes. Los administradores solo se crean
+		// mediante SeedData para evitar escalamiento de privilegios.
+		String requestedRole = request.role();
+		if (requestedRole != null && !requestedRole.isBlank()
+				&& !"CLIENTE".equalsIgnoreCase(requestedRole)
+				&& !DEFAULT_ROLE.equalsIgnoreCase(requestedRole)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"No está permitido auto-registrarse con el rol solicitado");
 		}
 
 		Usuario usuario = new Usuario();
 		usuario.setUsername(request.username());
 		usuario.setEmail(request.email());
 		usuario.setPassword(passwordEncoder.encode(request.password()));
-		usuario.setRole(role);
+		usuario.setRole(DEFAULT_ROLE);
 
 		usuarioRepository.save(usuario);
 
@@ -68,20 +76,20 @@ public class AuthService {
 	}
 
 	public AuthResponse login(LoginRequest request) {
+		Authentication authentication;
 		try {
-			Authentication authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(request.email(), request.password())
-			);
-
-			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-			String token = jwtService.generateToken(userDetails);
-
-			Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-			return new AuthResponse(token, usuario.getUsername(), usuario.getEmail(), usuario.getRole());
-		} catch (Exception e) {
+			authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+		} catch (AuthenticationException exception) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
 		}
+
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		String token = jwtService.generateToken(userDetails);
+
+		Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+		return new AuthResponse(token, usuario.getUsername(), usuario.getEmail(), usuario.getRole());
 	}
 }
