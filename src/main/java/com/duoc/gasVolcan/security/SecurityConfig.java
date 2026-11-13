@@ -56,6 +56,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/auth/**").permitAll()
 				.requestMatchers("/error").permitAll()
 				.requestMatchers("/h2-console/**").permitAll()
+				.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
 				// Productos: lectura pública, mutaciones solo ADMIN
 				.requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
