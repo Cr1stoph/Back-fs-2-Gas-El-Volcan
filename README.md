@@ -37,6 +37,12 @@ La API queda disponible en `http://localhost:8080`.
 El estado de salud para AWS y Docker está disponible en
 `http://localhost:8080/actuator/health`.
 
+La documentación interactiva Swagger está disponible en
+`http://localhost:8080/swagger-ui.html` y el contrato OpenAPI en
+`http://localhost:8080/v3/api-docs`. Para probar endpoints protegidos, primero
+inicia sesión en `/api/auth/login` y usa el botón **Authorize** con el token
+JWT obtenido.
+
 | Método | Endpoint | Uso |
 |---|---|---|
 | GET | `/api/productos` | Listar catálogo |
