@@ -50,15 +50,18 @@ public class SecurityConfig {
 				.accessDeniedHandler(accessDeniedHandler)
 			)
 			.authorizeHttpRequests(auth -> auth
+				// CORS preflight requests must never be blocked
+				.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 				// Public endpoints
 				.requestMatchers("/api/auth/**").permitAll()
+				.requestMatchers("/error").permitAll()
 				.requestMatchers("/h2-console/**").permitAll()
-				// Productos GET public, mutations restricted to ADMIN
+				// Productos: lectura pública, mutaciones solo ADMIN
 				.requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")
-				// Pedidos rules
+				// Pedidos: requieren autenticación, avanzar estado solo ADMIN
 				.requestMatchers(HttpMethod.GET, "/api/pedidos/**").authenticated()
 				.requestMatchers(HttpMethod.POST, "/api/pedidos/**").authenticated()
 				.requestMatchers(HttpMethod.PATCH, "/api/pedidos/**").hasRole("ADMIN")
@@ -68,7 +71,7 @@ public class SecurityConfig {
 			.authenticationProvider(authenticationProvider())
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-		// For H2 Console display
+		// Permite el frame de la consola H2 en desarrollo
 		http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
 		return http.build();
@@ -76,8 +79,7 @@ public class SecurityConfig {
 
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-		authProvider.setUserDetailsService(userDetailsService);
+		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
 		authProvider.setPasswordEncoder(passwordEncoder());
 		return authProvider;
 	}

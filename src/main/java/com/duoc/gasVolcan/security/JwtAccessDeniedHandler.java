@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.Map;
 
 import com.duoc.gasVolcan.config.ApiExceptionHandler.ApiError;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,10 +15,16 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
+import tools.jackson.databind.ObjectMapper;
+
 @Component
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
-	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final ObjectMapper objectMapper;
+
+	public JwtAccessDeniedHandler(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
 	@Override
 	public void handle(
@@ -28,6 +33,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 			AccessDeniedException accessDeniedException) throws IOException, ServletException {
 		response.setStatus(HttpStatus.FORBIDDEN.value());
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		response.setCharacterEncoding("UTF-8");
 
 		ApiError error = new ApiError(
 				HttpStatus.FORBIDDEN.value(),
@@ -36,6 +42,6 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 				Map.of()
 		);
 
-		response.getWriter().write(objectMapper.writeValueAsString(error));
+		objectMapper.writeValue(response.getWriter(), error);
 	}
 }
