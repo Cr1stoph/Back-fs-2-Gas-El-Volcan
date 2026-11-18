@@ -94,3 +94,45 @@ curl http://localhost:8080/actuator/health
 
 Para RDS, `DB_HOST` debe ser el endpoint DNS de la instancia. No subir `.env`
 al repositorio ni usar las credenciales de ejemplo en AWS.
+
+## Despliegue en AWS Learner Lab
+
+El laboratorio puede restringir RDS y otros servicios administrados. Para la
+evaluación existen dos opciones de base de datos:
+
+- **MySQL dentro de EC2:** usar `compose.ec2.yaml`. Esta opción no depende de
+  RDS y conserva los datos en el volumen Docker `db_data`.
+- **Amazon RDS:** usar `compose.rds.yaml` si tu Learner Lab permite crear RDS
+  y configurar su Security Group.
+
+Antes de desplegar, copia `.env.aws.example` a `.env.aws`, reemplaza todas las
+contraseñas y configura `CORS_ALLOWED_ORIGINS` con el origen HTTPS de GitHub
+Pages.
+
+Instala Docker en Ubuntu EC2:
+
+```bash
+chmod +x scripts/configurar-ec2.sh
+./scripts/configurar-ec2.sh
+exit
+```
+
+Después vuelve a conectarte y, para MySQL dentro de EC2:
+
+```bash
+cp .env.aws.example .env.aws
+docker compose --env-file .env.aws -f compose.ec2.yaml up --build -d
+docker compose --env-file .env.aws -f compose.ec2.yaml ps
+curl http://localhost/actuator/health
+```
+
+Para RDS:
+
+```bash
+DB_HOST=endpoint-rds \
+docker compose --env-file .env.aws -f compose.rds.yaml up --build -d
+```
+
+No uses la opción RDS si el laboratorio no permite crear instancias RDS. AWS
+Academy suele reiniciar las credenciales y los recursos al cerrar el Lab, por
+lo que documenta la IP pública y las evidencias antes de cerrar la sesión.
