@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/pedidos")
+@RequestMapping("/api/v1/pedidos")
 public class OrdenController {
 
 	private final OrdenService service;

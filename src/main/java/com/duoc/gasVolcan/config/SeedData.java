@@ -32,6 +32,13 @@ public class SeedData {
 				cliente.setPassword(passwordEncoder.encode("cliente123"));
 				cliente.setRole("ROLE_CLIENTE");
 				usuarioRepository.save(cliente);
+
+				Usuario vendedor = new Usuario();
+				vendedor.setUsername("vendedor");
+				vendedor.setEmail("vendedor@gasvolcan.cl");
+				vendedor.setPassword(passwordEncoder.encode("vendedor123"));
+				vendedor.setRole("ROLE_VENDEDOR");
+				usuarioRepository.save(vendedor);
 			}
 
 			if (productoRepository.count() > 0) {

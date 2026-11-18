@@ -53,20 +53,22 @@ public class SecurityConfig {
 				// CORS preflight requests must never be blocked
 				.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 				// Public endpoints
-				.requestMatchers("/api/auth/**").permitAll()
+				.requestMatchers("/api/v1/auth/**").permitAll()
 				.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 				.requestMatchers("/error").permitAll()
 				.requestMatchers("/h2-console/**").permitAll()
 				.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
 				// Productos: lectura pública, mutaciones solo ADMIN
-				.requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
-				.requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")
-				// Pedidos: requieren autenticación, avanzar estado solo ADMIN
-				.requestMatchers(HttpMethod.GET, "/api/pedidos/**").authenticated()
-				.requestMatchers(HttpMethod.POST, "/api/pedidos/**").authenticated()
-				.requestMatchers(HttpMethod.PATCH, "/api/pedidos/**").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.GET, "/api/v1/productos/**").permitAll()
+				.requestMatchers(HttpMethod.POST, "/api/v1/productos/**").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/v1/productos/**").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.DELETE, "/api/v1/productos/**").hasRole("ADMIN")
+				// Pedidos: lectura para administradores y vendedores; creación para usuarios autenticados
+				.requestMatchers(HttpMethod.GET, "/api/v1/pedidos/**")
+					.hasAnyRole("ADMIN", "VENDEDOR")
+				.requestMatchers(HttpMethod.POST, "/api/v1/pedidos/**").authenticated()
+				.requestMatchers(HttpMethod.PATCH, "/api/v1/pedidos/**")
+					.hasAnyRole("ADMIN", "VENDEDOR")
 				// Any other request
 				.anyRequest().authenticated()
 			)

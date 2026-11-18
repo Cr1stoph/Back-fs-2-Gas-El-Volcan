@@ -38,5 +38,5 @@ public class Usuario {
 
 	@NotBlank(message = "El rol es obligatorio")
 	@Column(nullable = false)
-	private String role; // e.g. "ROLE_ADMIN", "ROLE_CLIENTE"
+	private String role; // e.g. "ROLE_ADMIN", "ROLE_VENDEDOR", "ROLE_CLIENTE"
 }

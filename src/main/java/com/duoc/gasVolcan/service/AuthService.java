@@ -51,7 +51,7 @@ public class AuthService {
 		String requestedRole = request.role();
 		if (requestedRole != null && !requestedRole.isBlank()
 				&& !"CLIENTE".equalsIgnoreCase(requestedRole)
-				&& !DEFAULT_ROLE.equalsIgnoreCase(requestedRole)) {
+				&& !"ROLE_CLIENTE".equalsIgnoreCase(requestedRole)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 					"No está permitido auto-registrarse con el rol solicitado");
 		}
@@ -91,5 +91,29 @@ public class AuthService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
 		return new AuthResponse(token, usuario.getUsername(), usuario.getEmail(), usuario.getRole());
+	}
+
+	public AuthResponse refresh(String token) {
+		String email;
+		try {
+			email = jwtService.extractUsername(token);
+			if (!jwtService.isTokenValidForEmail(token, email)) {
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token inválido o expirado");
+			}
+		} catch (Exception exception) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token inválido o expirado");
+		}
+
+		Usuario usuario = usuarioRepository.findByEmail(email)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
+
+		UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+				.username(usuario.getEmail())
+				.password(usuario.getPassword())
+				.authorities(usuario.getRole())
+				.build();
+		String renewedToken = jwtService.generateToken(userDetails);
+
+		return new AuthResponse(renewedToken, usuario.getUsername(), usuario.getEmail(), usuario.getRole());
 	}
 }

@@ -40,20 +40,32 @@ El estado de salud para AWS y Docker está disponible en
 La documentación interactiva Swagger está disponible en
 `http://localhost:8080/swagger-ui.html` y el contrato OpenAPI en
 `http://localhost:8080/v3/api-docs`. Para probar endpoints protegidos, primero
-inicia sesión en `/api/auth/login` y usa el botón **Authorize** con el token
+inicia sesión en `/api/v1/auth/login` y usa el botón **Authorize** con el token
 JWT obtenido.
 
 | Método | Endpoint | Uso |
 |---|---|---|
-| GET | `/api/productos` | Listar catálogo |
-| GET | `/api/productos/{id}` | Ver un producto |
-| POST | `/api/productos` | Crear producto |
-| PUT | `/api/productos/{id}` | Editar producto |
-| DELETE | `/api/productos/{id}` | Eliminar producto |
-| GET | `/api/pedidos` | Listar pedidos |
-| GET | `/api/pedidos/{id}` | Ver comprobante |
-| POST | `/api/pedidos` | Crear pedido y descontar stock |
-| PATCH | `/api/pedidos/{id}/estado` | Avanzar pedido |
+| GET | `/api/v1/productos` | Listar catálogo |
+| GET | `/api/v1/productos/{id}` | Ver un producto |
+| POST | `/api/v1/productos` | Crear producto |
+| PUT | `/api/v1/productos/{id}` | Editar producto |
+| DELETE | `/api/v1/productos/{id}` | Eliminar producto |
+| GET | `/api/v1/pedidos` | Listar pedidos |
+| GET | `/api/v1/pedidos/{id}` | Ver comprobante |
+| POST | `/api/v1/pedidos` | Crear pedido y descontar stock |
+| PATCH | `/api/v1/pedidos/{id}/estado` | Avanzar pedido |
+
+Las rutas de autenticación están bajo `/api/v1/auth`:
+
+| Método | Endpoint | Uso |
+|---|---|---|
+| POST | `/api/v1/auth/register` | Registrar un cliente |
+| POST | `/api/v1/auth/login` | Iniciar sesión y obtener JWT |
+| POST | `/api/v1/auth/refresh` | Renovar un JWT vigente |
+
+El sistema administra los roles `ROLE_ADMIN`, `ROLE_VENDEDOR` y
+`ROLE_CLIENTE`. La demo inicial crea usuarios con las contraseñas indicadas
+para pruebas académicas y las credenciales deben cambiarse antes de producción.
 
 El checkout conserva las reglas del frontend: despacho de `$2.500`, retiro sin
 costo, ofertas solo si son menores al precio normal y tarjeta de prueba de

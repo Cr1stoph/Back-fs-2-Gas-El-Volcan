@@ -3,6 +3,7 @@ package com.duoc.gasVolcan.controller;
 import com.duoc.gasVolcan.model.AuthResponse;
 import com.duoc.gasVolcan.model.LoginRequest;
 import com.duoc.gasVolcan.model.RegisterRequest;
+import com.duoc.gasVolcan.model.RefreshRequest;
 import com.duoc.gasVolcan.service.AuthService;
 import jakarta.validation.Valid;
 
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
 	private final AuthService authService;
@@ -32,5 +33,10 @@ public class AuthController {
 	@PostMapping("/login")
 	public AuthResponse login(@Valid @RequestBody LoginRequest request) {
 		return authService.login(request);
+	}
+
+	@PostMapping("/refresh")
+	public AuthResponse refresh(@Valid @RequestBody RefreshRequest request) {
+		return authService.refresh(request.token());
 	}
 }
