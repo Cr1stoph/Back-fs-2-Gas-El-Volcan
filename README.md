@@ -109,7 +109,7 @@ Antes de desplegar, copia `.env.aws.example` a `.env.aws`, reemplaza todas las
 contraseñas y configura `CORS_ALLOWED_ORIGINS` con el origen HTTPS de GitHub
 Pages.
 
-Instala Docker en Ubuntu EC2:
+Instala Docker en Ubuntu EC2 o Amazon Linux 2023:
 
 ```bash
 chmod +x scripts/configurar-ec2.sh
