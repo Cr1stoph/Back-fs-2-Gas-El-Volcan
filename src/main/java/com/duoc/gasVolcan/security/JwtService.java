@@ -28,7 +28,7 @@ public class JwtService {
 	public JwtService(
 			@Value("${jwt.expiration:86400000}") long jwtExpiration) {
 		this(System.getenv().getOrDefault(
-				"JWT_SECRET",
+				"APP_JWT_SECRET",
 				"404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"),
 				jwtExpiration);
 	}
