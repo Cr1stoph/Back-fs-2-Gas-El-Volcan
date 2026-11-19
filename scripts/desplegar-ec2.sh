@@ -26,7 +26,7 @@ chmod 600 .env.aws
 docker compose --env-file .env.aws -f compose.ec2.yaml pull
 docker compose --env-file .env.aws -f compose.ec2.yaml up --build -d
 
-for attempt in {1..30}; do
+for attempt in {1..60}; do
 	if curl --fail --silent --show-error http://localhost/actuator/health >/dev/null; then
 		echo "Backend desplegado y saludable."
 		exit 0
