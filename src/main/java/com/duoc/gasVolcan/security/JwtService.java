@@ -10,6 +10,7 @@ import java.util.function.Function;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +24,16 @@ public class JwtService {
 	private final String secretKey;
 	private final long jwtExpiration;
 
+	@Autowired
 	public JwtService(
-			@Value("${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}") String secretKey,
 			@Value("${jwt.expiration:86400000}") long jwtExpiration) {
+		this(System.getenv().getOrDefault(
+				"JWT_SECRET",
+				"404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"),
+				jwtExpiration);
+	}
+
+	public JwtService(String secretKey, long jwtExpiration) {
 		this.secretKey = secretKey;
 		this.jwtExpiration = jwtExpiration;
 	}
