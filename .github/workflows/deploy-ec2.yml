@@ -46,6 +46,25 @@ jobs:
       - name: Package deployment
         run: tar -czf /tmp/gas-volcan.tar.gz --exclude=.git --exclude=data .
 
+      - name: Create deployment environment
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+        run: |
+          {
+            printf 'DB_NAME=gasvolcan\n'
+            printf 'DB_USER=gasvolcan\n'
+            printf 'DB_PASSWORD=%s\n' "$DB_PASSWORD"
+            printf 'DB_ROOT_PASSWORD=%s\n' "$DB_ROOT_PASSWORD"
+            printf 'DB_HOST=db\n'
+            printf 'JWT_SECRET=%s\n' "$JWT_SECRET"
+            printf 'JWT_EXPIRATION=86400000\n'
+            printf 'CORS_ALLOWED_ORIGINS=%s\n' "$CORS_ALLOWED_ORIGINS"
+          } > /tmp/gas-volcan.env
+          chmod 600 /tmp/gas-volcan.env
+
       - name: Upload deployment package
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -54,22 +73,16 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key -p "${EC2_PORT:-22}" "$EC2_USER@$EC2_HOST" "sudo mkdir -p /opt/gas-volcan && sudo chown -R $EC2_USER /opt/gas-volcan"
           scp -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key -P "${EC2_PORT:-22}" /tmp/gas-volcan.tar.gz "$EC2_USER@$EC2_HOST:/tmp/gas-volcan.tar.gz"
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key -P "${EC2_PORT:-22}" /tmp/gas-volcan.env "$EC2_USER@$EC2_HOST:/tmp/gas-volcan.env"
 
       - name: Deploy and verify health
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_PORT: ${{ secrets.EC2_PORT }}
           EC2_USER: ${{ secrets.EC2_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key -p "${EC2_PORT:-22}" "$EC2_USER@$EC2_HOST" \
-            "export DB_PASSWORD=$(printf %q '${DB_PASSWORD}') \
-             DB_ROOT_PASSWORD=$(printf %q '${DB_ROOT_PASSWORD}') \
-             JWT_SECRET=$(printf %q '${JWT_SECRET}') \
-             CORS_ALLOWED_ORIGINS=$(printf %q '${CORS_ALLOWED_ORIGINS}'); \
-             mkdir -p /opt/gas-volcan && tar -xzf /tmp/gas-volcan.tar.gz -C /opt/gas-volcan && \
+            "mkdir -p /opt/gas-volcan && tar -xzf /tmp/gas-volcan.tar.gz -C /opt/gas-volcan && \
+             install -m 600 /tmp/gas-volcan.env /opt/gas-volcan/.env.aws && \
              cd /opt/gas-volcan && chmod +x scripts/desplegar-ec2.sh && \
              ./scripts/desplegar-ec2.sh"
