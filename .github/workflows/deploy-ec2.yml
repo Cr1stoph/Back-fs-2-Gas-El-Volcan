@@ -27,6 +27,9 @@ jobs:
       - name: Run backend tests
         run: ./mvnw test
 
+      - name: Package backend
+        run: ./mvnw -B -DskipTests package
+
       - name: Create SSH directory
         run: mkdir -p ~/.ssh
 
@@ -41,7 +44,7 @@ jobs:
           ssh-keyscan -H -p "${EC2_PORT:-22}" "$EC2_HOST" >> ~/.ssh/known_hosts
 
       - name: Package deployment
-        run: tar -czf /tmp/gas-volcan.tar.gz --exclude=.git --exclude=target --exclude=data .
+        run: tar -czf /tmp/gas-volcan.tar.gz --exclude=.git --exclude=data .
 
       - name: Upload deployment package
         env:

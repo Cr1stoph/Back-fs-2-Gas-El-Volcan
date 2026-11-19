@@ -140,8 +140,8 @@ lo que documenta la IP pública y las evidencias antes de cerrar la sesión.
 ## Despliegue automático desde GitHub Actions
 
 La rama `main` puede desplegar el backend en EC2 mediante el workflow
-`.github/workflows/deploy-ec2.yml`. El workflow valida el código, construye la
-imagen Docker, transmite una versión del repositorio mediante SSH y actualiza
+`.github/workflows/deploy-ec2.yml`. El workflow valida y empaqueta el JAR en
+GitHub Actions, transmite una versión del repositorio mediante SSH y actualiza
 los contenedores en `/opt/gas-volcan`.
 
 Configura los siguientes secretos en el repositorio backend:
