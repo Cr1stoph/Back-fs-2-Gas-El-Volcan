@@ -2,7 +2,6 @@
 .github
 .idea
 .vscode
-target
 data/*.trace.db
 data/*.lock.db
 .env
