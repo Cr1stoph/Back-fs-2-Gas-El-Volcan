@@ -2,3 +2,7 @@ target/
 data/
 .env
 .env.aws
+
+# Build del frontend publicado en el EC2 (solo se versiona el README de la carpeta)
+/frontend/*
+!/frontend/README.md
