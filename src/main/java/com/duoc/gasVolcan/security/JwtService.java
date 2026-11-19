@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 import javax.crypto.SecretKey;
@@ -66,6 +67,7 @@ public class JwtService {
 		return Jwts.builder()
 				.claims(extraClaims)
 				.subject(userDetails.getUsername())
+				.id(UUID.randomUUID().toString())
 				.issuedAt(now)
 				.expiration(new Date(now.getTime() + jwtExpiration))
 				.signWith(getSignInKey())
