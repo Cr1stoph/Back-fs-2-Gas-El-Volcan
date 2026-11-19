@@ -10,6 +10,9 @@ if command -v apt-get >/dev/null 2>&1; then
 elif command -v dnf >/dev/null 2>&1; then
 	sudo dnf update -y
 	sudo dnf install -y docker
+	if sudo dnf info docker-compose-plugin >/dev/null 2>&1; then
+		sudo dnf install -y docker-compose-plugin
+	fi
 	sudo systemctl enable docker
 	sudo systemctl start docker
 	sudo usermod -aG docker ec2-user

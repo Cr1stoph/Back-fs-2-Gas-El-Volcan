@@ -136,3 +136,26 @@ docker compose --env-file .env.aws -f compose.rds.yaml up --build -d
 No uses la opción RDS si el laboratorio no permite crear instancias RDS. AWS
 Academy suele reiniciar las credenciales y los recursos al cerrar el Lab, por
 lo que documenta la IP pública y las evidencias antes de cerrar la sesión.
+
+## Despliegue automático desde GitHub Actions
+
+La rama `main` puede desplegar el backend en EC2 mediante el workflow
+`.github/workflows/deploy-ec2.yml`. El workflow valida el código, construye la
+imagen Docker, transmite una versión del repositorio mediante SSH y actualiza
+los contenedores en `/opt/gas-volcan`.
+
+Configura los siguientes secretos en el repositorio backend:
+
+| Secreto | Uso |
+|---|---|
+| `EC2_HOST` | IP pública o DNS de EC2 |
+| `EC2_USER` | Usuario SSH, normalmente `ec2-user` en Amazon Linux |
+| `EC2_SSH_KEY` | Clave privada SSH completa |
+| `EC2_PORT` | Puerto SSH; puede omitirlo si usa `22` |
+| `DB_PASSWORD` | Contraseña de la base MySQL |
+| `DB_ROOT_PASSWORD` | Contraseña root de MySQL |
+| `JWT_SECRET` | Secreto JWT de al menos 32 caracteres |
+| `CORS_ALLOWED_ORIGINS` | Origen HTTPS de GitHub Pages |
+
+El workflow usa `compose.ec2.yaml` por defecto. Antes del primer despliegue,
+instala Docker y abre los puertos `22`, `80` y `443` en el Security Group de EC2.
