@@ -52,7 +52,7 @@ jobs:
           EC2_PORT: ${{ secrets.EC2_PORT }}
           EC2_USER: ${{ secrets.EC2_USER }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key -p "${EC2_PORT:-22}" "$EC2_USER@$EC2_HOST" "sudo mkdir -p /opt/gas-volcan && sudo chown -R $USER /opt/gas-volcan"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key -p "${EC2_PORT:-22}" "$EC2_USER@$EC2_HOST" "sudo mkdir -p /opt/gas-volcan && sudo chown -R $EC2_USER /opt/gas-volcan"
           scp -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key -P "${EC2_PORT:-22}" /tmp/gas-volcan.tar.gz "$EC2_USER@$EC2_HOST:/tmp/gas-volcan.tar.gz"
 
       - name: Deploy and verify health
