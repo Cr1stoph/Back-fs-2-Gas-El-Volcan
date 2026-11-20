@@ -36,12 +36,23 @@ services:
       DB_NAME: ${DB_NAME:-gasvolcan}
       DB_USER: ${DB_USER:-gasvolcan}
       DB_PASSWORD: ${DB_PASSWORD:-gasvolcan}
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET debe estar definido en .env}
+      JWT_SECRET: ${JWT_SECRET:-GasElVolcanSecretKey_2026_FullstackDuocUC_SecureJWT_9837}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:4173}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../fs-2-Gas-El-Volcan
+      dockerfile: Dockerfile
+    container_name: gas-volcan-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
     restart: unless-stopped
 
 volumes:
