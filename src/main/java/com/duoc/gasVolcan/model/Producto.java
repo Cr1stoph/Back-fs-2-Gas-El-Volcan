@@ -5,8 +5,11 @@ import java.math.BigDecimal;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -34,6 +37,11 @@ public class Producto {
 
 	@Column(nullable = false, length = 60)
 	private String categoria;
+
+	/** Relación real con CATEGORIA. El String categoria se mantiene por compatibilidad de la API. */
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "categoria_id")
+	private Categoria categoriaRef;
 
 	protected Producto() {
 	}
@@ -97,6 +105,11 @@ public class Producto {
 
 	public void setCategoria(String categoria) {
 		this.categoria = categoria;
+	}
+
+	/** Sin getter público: la API sigue exponiendo {@code categoria} como String. */
+	public void setCategoriaRef(Categoria categoriaRef) {
+		this.categoriaRef = categoriaRef;
 	}
 }
 

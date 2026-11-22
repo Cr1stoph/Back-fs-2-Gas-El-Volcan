@@ -4,6 +4,7 @@ import com.duoc.gasVolcan.model.AuthResponse;
 import com.duoc.gasVolcan.model.LoginRequest;
 import com.duoc.gasVolcan.model.RegisterRequest;
 import com.duoc.gasVolcan.model.Usuario;
+import com.duoc.gasVolcan.model.UsuarioResponse;
 import com.duoc.gasVolcan.repository.UsuarioRepository;
 import com.duoc.gasVolcan.security.JwtService;
 
@@ -91,6 +92,13 @@ public class AuthService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
 		return new AuthResponse(token, usuario.getUsername(), usuario.getEmail(), usuario.getRole());
+	}
+
+	/** Valida que el JWT siga vigente devolviendo los datos basicos del usuario. */
+	public UsuarioResponse currentUser(String email) {
+		Usuario usuario = usuarioRepository.findByEmail(email)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
+		return new UsuarioResponse(usuario.getId(), usuario.getUsername(), usuario.getEmail(), usuario.getRole());
 	}
 
 	public AuthResponse refresh(String token) {

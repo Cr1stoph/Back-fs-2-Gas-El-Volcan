@@ -6,6 +6,7 @@ import java.util.List;
 import com.duoc.gasVolcan.model.Producto;
 import com.duoc.gasVolcan.model.ProductoRequest;
 import com.duoc.gasVolcan.repository.ProductoRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,13 +16,19 @@ import org.springframework.web.server.ResponseStatusException;
 public class ProductoService {
 
 	private final ProductoRepository repository;
+	private final CategoriaService categoriaService;
 
-	public ProductoService(ProductoRepository repository) {
+	public ProductoService(ProductoRepository repository, CategoriaService categoriaService) {
 		this.repository = repository;
+		this.categoriaService = categoriaService;
 	}
 
 	public List<Producto> findAll() {
 		return repository.findAll();
+	}
+
+	public List<Producto> findByCategoria(String categoria) {
+		return repository.findByCategoriaIgnoreCaseOrderById(categoria);
 	}
 
 	public Producto findById(Long id) {
@@ -32,8 +39,10 @@ public class ProductoService {
 	@Transactional
 	public Producto create(ProductoRequest request) {
 		validateOffer(request.precio(), request.precioOferta());
-		return repository.save(new Producto(request.nombre().trim(), request.precio(), request.precioOferta(),
-				request.img(), request.stock(), request.categoria().trim()));
+		Producto producto = new Producto(request.nombre().trim(), request.precio(), request.precioOferta(),
+				request.img(), request.stock(), request.categoria().trim());
+		producto.setCategoriaRef(categoriaService.findOrCreate(request.categoria()));
+		return repository.save(producto);
 	}
 
 	@Transactional
@@ -46,6 +55,7 @@ public class ProductoService {
 		producto.setImg(request.img());
 		producto.setStock(request.stock());
 		producto.setCategoria(request.categoria().trim());
+		producto.setCategoriaRef(categoriaService.findOrCreate(request.categoria()));
 		return producto;
 	}
 
@@ -62,5 +72,3 @@ public class ProductoService {
 		}
 	}
 }
-
-

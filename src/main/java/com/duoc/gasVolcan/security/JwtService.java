@@ -26,14 +26,14 @@ public class JwtService {
 
 	@Autowired
 	public JwtService(
+			@Value("${jwt.secret}") String secretKey,
 			@Value("${jwt.expiration:86400000}") long jwtExpiration) {
-		this(System.getenv().getOrDefault(
-				"APP_JWT_SECRET",
-				"404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"),
-				jwtExpiration);
+		this.secretKey = secretKey;
+		this.jwtExpiration = jwtExpiration;
 	}
 
-	public JwtService(String secretKey, long jwtExpiration) {
+	/** Constructor alternativo para pruebas unitarias (evita depender del contexto Spring). */
+	public JwtService(String secretKey, long jwtExpiration, boolean soloPruebas) {
 		this.secretKey = secretKey;
 		this.jwtExpiration = jwtExpiration;
 	}
