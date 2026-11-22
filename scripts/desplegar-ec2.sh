@@ -30,6 +30,15 @@ done
 
 chmod 600 .env.aws
 
+# Liberar espacio antes de reconstruir. NO se usan --volumes para preservar la BD.
+echo "Espacio antes de la limpieza:"
+df -h / || true
+docker container prune -f || true
+docker image prune -af || true
+docker builder prune -af || true
+echo "Espacio después de la limpieza:"
+df -h / || true
+
 docker compose --env-file .env.aws -f compose.ec2.yaml pull
 docker compose --env-file .env.aws -f compose.ec2.yaml up --build -d
 
