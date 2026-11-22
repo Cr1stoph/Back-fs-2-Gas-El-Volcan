@@ -2,8 +2,8 @@ package com.duoc.gasVolcan.controller;
 
 import java.util.List;
 
-import com.duoc.gasVolcan.model.Usuario;
 import com.duoc.gasVolcan.model.UsuarioRequest;
+import com.duoc.gasVolcan.model.UsuarioResponse;
 import com.duoc.gasVolcan.service.UsuarioService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,7 +40,7 @@ public class UsuarioController {
 	@GetMapping
 	@Operation(summary = "Listar usuarios", description = "Sólo ADMINISTRADOR")
 	@ApiResponse(responseCode = "200", description = "Listado obtenido")
-	public List<Usuario> findAll() {
+	public List<UsuarioResponse> findAll() {
 		return service.findAll();
 	}
 
@@ -48,22 +48,22 @@ public class UsuarioController {
 	@Operation(summary = "Detalle de usuario", description = "Sólo ADMINISTRADOR")
 	@ApiResponse(responseCode = "200", description = "Usuario encontrado")
 	@ApiResponse(responseCode = "404", description = "Usuario no encontrado")
-	public Usuario findById(@PathVariable Long id) {
-		return service.findById(id);
+	public UsuarioResponse findById(@PathVariable Long id) {
+		return service.findByIdResponse(id);
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	@Operation(summary = "Crear usuario", description = "Permite asignar ADMIN, VENDEDOR o CLIENTE")
 	@ApiResponse(responseCode = "201", description = "Usuario creado")
-	public Usuario create(@Valid @RequestBody UsuarioRequest request) {
+	public UsuarioResponse create(@Valid @RequestBody UsuarioRequest request) {
 		return service.create(request);
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Actualizar usuario", description = "Actualiza datos y rol del usuario")
 	@ApiResponse(responseCode = "200", description = "Usuario actualizado")
-	public Usuario update(@PathVariable Long id, @Valid @RequestBody UsuarioRequest request) {
+	public UsuarioResponse update(@PathVariable Long id, @Valid @RequestBody UsuarioRequest request) {
 		return service.update(id, request);
 	}
 

@@ -26,8 +26,12 @@ public class UsuarioService {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	public List<Usuario> findAll() {
-		return repository.findAll();
+	public List<UsuarioResponse> findAll() {
+		return repository.findAll().stream().map(this::toResponse).toList();
+	}
+
+	public UsuarioResponse findByIdResponse(Long id) {
+		return toResponse(findById(id));
 	}
 
 	public Usuario findById(Long id) {
@@ -42,7 +46,7 @@ public class UsuarioService {
 	}
 
 	@Transactional
-	public Usuario create(UsuarioRequest request) {
+	public UsuarioResponse create(UsuarioRequest request) {
 		String email = normalizarEmail(request.email());
 		if (repository.existsByEmail(email) || repository.existsByUsername(request.username().trim())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email o nombre de usuario ya está registrado");
@@ -50,16 +54,19 @@ public class UsuarioService {
 		if (request.password() == null || request.password().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña es obligatoria");
 		}
+		if (request.password().length() < 8) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña debe tener al menos 8 caracteres");
+		}
 		Usuario usuario = new Usuario();
 		usuario.setUsername(request.username().trim());
 		usuario.setEmail(email);
 		usuario.setPassword(passwordEncoder.encode(request.password()));
 		usuario.setRole(resolverRol(request.role()));
-		return repository.save(usuario);
+		return toResponse(repository.save(usuario));
 	}
 
 	@Transactional
-	public Usuario update(Long id, UsuarioRequest request) {
+	public UsuarioResponse update(Long id, UsuarioRequest request) {
 		Usuario usuario = findById(id);
 		String email = normalizarEmail(request.email());
 		repository.findByEmail(email)
@@ -79,12 +86,17 @@ public class UsuarioService {
 			usuario.setPassword(passwordEncoder.encode(request.password()));
 		}
 		usuario.setRole(resolverRol(request.role()));
-		return usuario;
+		return toResponse(usuario);
 	}
 
 	@Transactional
 	public void delete(Long id) {
 		repository.delete(findById(id));
+	}
+
+	/** Nunca expone el hash de la contraseña en la API de administración. */
+	private UsuarioResponse toResponse(Usuario usuario) {
+		return new UsuarioResponse(usuario.getId(), usuario.getUsername(), usuario.getEmail(), usuario.getRole());
 	}
 
 	private String normalizarEmail(String email) {
