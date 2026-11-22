@@ -83,7 +83,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/v1/pedidos/*").hasAnyRole("ADMIN", "VENDEDOR", "CLIENTE")
 				.requestMatchers(HttpMethod.POST, "/api/v1/pedidos").hasAnyRole("ADMIN", "CLIENTE")
 				.requestMatchers(HttpMethod.PUT, "/api/v1/pedidos/*").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.PATCH, "/api/v1/pedidos/*").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PATCH, "/api/v1/pedidos/*/estado").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.DELETE, "/api/v1/pedidos/*").hasRole("ADMIN")
 
 				// Cualquier ruta nueva debe declararse explícitamente.
