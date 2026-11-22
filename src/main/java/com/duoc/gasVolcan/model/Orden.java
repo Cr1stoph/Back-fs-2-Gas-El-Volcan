@@ -12,6 +12,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -32,13 +34,18 @@ public class Orden {
 	private BigDecimal despacho;
 	private BigDecimal total;
 
+	/** Boleta/Pedido perteneciente a un USUARIO (relación exigida por la rúbrica). */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "usuario_id")
+	private Usuario usuario;
+
 	@Enumerated(EnumType.STRING)
 	private EstadoPago estadoPago;
 
 	@Enumerated(EnumType.STRING)
 	private EstadoOrden estado;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "orden", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OrdenItem> items = new ArrayList<>();
 
 	public Orden() {
@@ -70,6 +77,13 @@ public class Orden {
 	public void setTotal(BigDecimal value) { total = value; }
 	public void setEstadoPago(EstadoPago value) { estadoPago = value; }
 	public void setEstado(EstadoOrden value) { estado = value; }
+
+	public void setUsuario(Usuario value) { usuario = value; }
+
+	/** Comprobación de propiedad sin exponer la entidad Usuario (ni su password) en la API. */
+	public boolean perteneceA(String email) {
+		return usuario != null && usuario.getEmail().equalsIgnoreCase(email);
+	}
 }
 
 

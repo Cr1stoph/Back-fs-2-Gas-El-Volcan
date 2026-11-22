@@ -18,6 +18,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Matriz de acceso exigida por la rúbrica:
+ * - ADMINISTRADOR: acceso total.
+ * - VENDEDOR: sólo consultas de productos y boletas (GET); sin escritura.
+ * - CLIENTE: tienda pública, creación de pedidos y consulta de SUS pedidos.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -50,32 +56,42 @@ public class SecurityConfig {
 				.accessDeniedHandler(accessDeniedHandler)
 			)
 			.authorizeHttpRequests(auth -> auth
-				// CORS preflight requests must never be blocked
 				.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-				// Public endpoints
-				.requestMatchers("/api/v1/auth/**").permitAll()
-				.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+				// Documentación y endpoints públicos de autenticación
+				.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
+				.requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/register",
+						"/api/v1/auth/refresh").permitAll()
+				.requestMatchers("/api/v1/auth/me").authenticated()
 				.requestMatchers("/error").permitAll()
-				.requestMatchers("/h2-console/**").permitAll()
 				.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
-				// Productos: lectura pública, mutaciones solo ADMIN
-				.requestMatchers(HttpMethod.GET, "/api/v1/productos/**").permitAll()
-				.requestMatchers(HttpMethod.POST, "/api/v1/productos/**").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.PUT, "/api/v1/productos/**").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.DELETE, "/api/v1/productos/**").hasRole("ADMIN")
-				// Pedidos: lectura para administradores y vendedores; creación para usuarios autenticados
-				.requestMatchers(HttpMethod.GET, "/api/v1/pedidos/**")
-					.hasAnyRole("ADMIN", "VENDEDOR")
-				.requestMatchers(HttpMethod.POST, "/api/v1/pedidos/**").authenticated()
-				.requestMatchers(HttpMethod.PATCH, "/api/v1/pedidos/**")
-					.hasAnyRole("ADMIN", "VENDEDOR")
-				// Any other request
-				.anyRequest().authenticated()
+				.requestMatchers("/h2-console/**").hasRole("ADMIN")
+
+				// Catálogo: lectura pública, escritura exclusiva de ADMINISTRADOR
+				.requestMatchers(HttpMethod.GET, "/api/v1/productos", "/api/v1/productos/*").permitAll()
+				.requestMatchers(HttpMethod.POST, "/api/v1/productos", "/api/v1/productos/*").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/v1/productos/*").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.DELETE, "/api/v1/productos/*").hasRole("ADMIN")
+
+				// Administración de USUARIO y CATEGORIA: nadie más que ADMIN
+				.requestMatchers("/api/v1/usuarios", "/api/v1/usuarios/**").hasRole("ADMIN")
+				.requestMatchers("/api/v1/categorias", "/api/v1/categorias/**").hasRole("ADMIN")
+
+				// Pedidos: VENDEDOR sólo consulta; CLIENTE crea y consulta los suyos.
+				.requestMatchers(HttpMethod.GET, "/api/v1/pedidos/mios").hasAnyRole("ADMIN", "VENDEDOR", "CLIENTE")
+				.requestMatchers(HttpMethod.GET, "/api/v1/pedidos").hasAnyRole("ADMIN", "VENDEDOR")
+				.requestMatchers(HttpMethod.GET, "/api/v1/pedidos/*").hasAnyRole("ADMIN", "VENDEDOR", "CLIENTE")
+				.requestMatchers(HttpMethod.POST, "/api/v1/pedidos").hasAnyRole("ADMIN", "CLIENTE")
+				.requestMatchers(HttpMethod.PUT, "/api/v1/pedidos/*").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PATCH, "/api/v1/pedidos/*").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.DELETE, "/api/v1/pedidos/*").hasRole("ADMIN")
+
+				// Cualquier ruta nueva debe declararse explícitamente.
+				.anyRequest().denyAll()
 			)
 			.authenticationProvider(authenticationProvider())
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-		// Permite el frame de la consola H2 en desarrollo
 		http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
 		return http.build();

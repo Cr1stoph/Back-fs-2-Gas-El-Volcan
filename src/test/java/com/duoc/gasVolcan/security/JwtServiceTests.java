@@ -15,7 +15,7 @@ class JwtServiceTests {
 
 	private final JwtService jwtService = new JwtService(
 			"UnaClaveJWTDePruebaConAlMenosTreintaYDosCaracteresSeguros",
-			60000);
+			60000, true);
 
 	@Test
 	void generaYRenuevaUnTokenParaElUsuario() {
